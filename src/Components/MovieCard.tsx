@@ -10,16 +10,23 @@ interface Movie {
 
 interface MovieCardProps {
   movie: Movie;
-  onFavoriteToggle: (movie: Movie) => void; // Add this prop
+  onFavoriteToggle: (movie: Movie) => void;
+  onWatchlistToggle?: (movie: Movie) => void; // Make this prop optional
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle }) => {
+const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle, onWatchlistToggle }) => {
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : 'placeholder-image-url'; // Replace with your placeholder image URL
 
   const handleFavoriteClick = () => {
-    onFavoriteToggle(movie); // Call the function passed down from the parent component
+    onFavoriteToggle(movie);
+  };
+
+  const handleWatchlistClick = () => {
+    if (onWatchlistToggle) {
+      onWatchlistToggle(movie); // Correct function call here
+    }
   };
 
   return (
@@ -32,6 +39,11 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle }) => {
           <button className="favorite-btn" onClick={handleFavoriteClick}>
             ❤️
           </button>
+          {onWatchlistToggle && ( // Only render if onWatchlistToggle is passed
+            <button className="watchlist-btn" onClick={handleWatchlistClick}>
+              ⭐
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ interface Movie {
 
 const HomePage: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [watchlist, setWatchlist] = useState<Movie[]>([]); // Add watchlist state
 
   // Fetch popular movies when the component mounts
   useEffect(() => {
@@ -40,6 +41,28 @@ const HomePage: React.FC = () => {
     }
   };
 
+  // Handle adding/removing a movie to/from the watchlist
+  const handleWatchlistToggle = (movie: Movie) => {
+    const watchlistMovies = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    const isInWatchlist = watchlistMovies.some((wlMovie: Movie) => wlMovie.id === movie.id);
+
+    if (isInWatchlist) {
+      const updatedWatchlist = watchlistMovies.filter((wlMovie: Movie) => wlMovie.id !== movie.id);
+      localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+      setWatchlist(updatedWatchlist);
+    } else {
+      watchlistMovies.push(movie);
+      localStorage.setItem('watchlist', JSON.stringify(watchlistMovies));
+      setWatchlist(watchlistMovies);
+    }
+  };
+
+  // Load watchlist from localStorage on component mount
+  useEffect(() => {
+    const storedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    setWatchlist(storedWatchlist);
+  }, []);
+
   return (
     <div className="home-page">
       <Navbar />
@@ -50,8 +73,18 @@ const HomePage: React.FC = () => {
           <SearchBar setMovies={setMovies} />
         </div>
       </div>
+
       <h2 className="section-title">Movies</h2>
-      <MovieGrid movies={movies} onFavoriteToggle={handleFavoriteToggle} />
+      <MovieGrid movies={movies} onFavoriteToggle={handleFavoriteToggle} onWatchlistToggle={handleWatchlistToggle} />
+
+      {/* Watchlist Section */}
+      {watchlist.length > 0 && (
+        <>
+          <h2 className="section-title">Watchlist</h2>
+          <MovieGrid movies={watchlist} onFavoriteToggle={handleFavoriteToggle} onWatchlistToggle={handleWatchlistToggle} />
+        </>
+      )}
+
       <Footer />
     </div>
   );
