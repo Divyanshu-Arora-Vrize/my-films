@@ -2,12 +2,23 @@
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark {
+  background-color: #111;
+  color: #fff;
+}
+
+body.light {
+  background-color: #f1f1f1;
+  color: #474646;
 }
 
 /* HomePage Styles */
 .home-page {
-  background-color: #111;
-  color: #fff;
+  background-color: inherit;
+  color: inherit;
 }
 
 /* Hero Section */
@@ -20,7 +31,7 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;
+  color: inherit;
 }
 
 .hero-content h1 {
@@ -55,6 +66,11 @@ body {
   align-items: center;
   padding: 20px;
   background-color: #222;
+  transition: background-color 0.3s ease;
+}
+
+body.light .navbar {
+  background-color: #e0e0e0;
 }
 
 .navbar-logo span {
@@ -68,13 +84,43 @@ body {
 }
 
 .navbar-links a {
-  color: #fff;
+  color: inherit;
   text-decoration: none;
   font-size: 1.2rem;
 }
 
 .navbar-links a:hover {
   color: #ffc107;
+}
+
+body.light .navbar-links a {
+  color: #333;
+}
+
+body.light .navbar-links a:hover {
+  color: #111;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #ffc107;
+  transition: color 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  color: #ffcd38;
+}
+
+body.light .theme-toggle-btn {
+  color: #333;
+}
+
+body.light .theme-toggle-btn:hover {
+  color: #555;
 }
 
 /* SearchBar Styles */
@@ -86,6 +132,7 @@ body {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 50px;
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .search-input {
@@ -94,7 +141,7 @@ body {
   background: transparent;
   border: none;
   outline: none;
-  color: #fff;
+  color: inherit;
   flex: 1;
 }
 
@@ -114,6 +161,14 @@ body {
 
 .search-btn:hover {
   background-color: #ffcd38;
+}
+
+body.light .search-bar {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light .search-input::placeholder {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 /* MovieGrid Styles */
@@ -140,7 +195,6 @@ body {
 
 .movie-card {
   position: relative;
-  /* Ensure this is present */
   min-width: 200px;
   margin: 0 10px;
   background-color: #333;
@@ -154,6 +208,10 @@ body {
 .movie-card:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+body.light .movie-card {
+  background-color: #e0e0e0;
 }
 
 .movie-poster {
@@ -179,11 +237,8 @@ body {
 .movie-meta {
   position: absolute;
   bottom: 10px;
-  /* Adjust the distance from the bottom */
   width: calc(100% - 20px);
-  /* Ensure it fits within the card by subtracting padding */
   padding: 0 10px;
-  /* Space for button */
   display: flex;
   justify-content: flex-end;
   z-index: 10;
@@ -196,22 +251,18 @@ body {
   cursor: pointer;
   font-size: 1.5rem;
   color: #ff6347;
-  /* Change this color to your desired color */
   transition: transform 0.3s ease, color 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px;
   z-index: 20;
-  /* Ensure it's above other elements */
 }
 
 .dropdown-menu {
   position: absolute;
   bottom: 50px;
-  /* Position it above the button */
   right: 10px;
-  /* Align with the button */
   background-color: #333;
   border-radius: 8px;
   overflow: hidden;
@@ -304,7 +355,7 @@ body {
 .favorite-movies h2 {
   margin-bottom: 20px;
   font-size: 24px;
-  color: #fff;
+  color: inherit;
 }
 
 .favorite-movies .movie-grid {
@@ -339,7 +390,7 @@ body {
   background-color: #1c1c1c;
   padding: 20px 0;
   text-align: center;
-  color: #f1f1f1;
+  color: inherit;
   font-size: 14px;
   margin-top: 30px;
 }
@@ -355,7 +406,7 @@ body {
 }
 
 .footer-link {
-  color: #f1f1f1;
+  color: inherit;
   text-decoration: none;
   margin: 0 10px;
 }
