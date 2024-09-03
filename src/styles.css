@@ -12,7 +12,7 @@ body.dark {
 
 body.light {
   background-color: #f1f1f1;
-  color: #030303;
+  color: #444343;
 }
 
 /* HomePage Styles */
@@ -339,11 +339,11 @@ body.light .movie-card {
 }
 
 .left-arrow {
-  left: 10px;
+  left: 20px;
 }
 
 .right-arrow {
-  right: 10px;
+  right: 20px;
 }
 
 /* Favorite Movies Styles */

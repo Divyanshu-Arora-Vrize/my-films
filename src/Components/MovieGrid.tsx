@@ -19,13 +19,13 @@ const MovieGrid: React.FC<MovieGridProps> = ({ movies, onFavoriteToggle, onWatch
 
   const handleScrollLeft = () => {
     if (movieGridRef.current) {
-      movieGridRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+      movieGridRef.current.scrollBy({ left: -301, behavior: 'smooth' });
     }
   };
 
   const handleScrollRight = () => {
     if (movieGridRef.current) {
-      movieGridRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+      movieGridRef.current.scrollBy({ left: 301, behavior: 'smooth' });
     }
   };
 
