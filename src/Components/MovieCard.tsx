@@ -1,5 +1,5 @@
-import React from 'react';
-import '../styles.css';
+import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface Movie {
   id: number;
@@ -11,22 +11,30 @@ interface Movie {
 interface MovieCardProps {
   movie: Movie;
   onFavoriteToggle: (movie: Movie) => void;
-  onWatchlistToggle?: (movie: Movie) => void; // Make this prop optional
+  onWatchlistToggle: (movie: Movie) => void;
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle, onWatchlistToggle }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : 'placeholder-image-url'; // Replace with your placeholder image URL
 
   const handleFavoriteClick = () => {
     onFavoriteToggle(movie);
+    toast.success(`${movie.title} added to favorites!`); // Show toast notification
+    setMenuOpen(false); // Close the menu after selecting an option
   };
 
   const handleWatchlistClick = () => {
-    if (onWatchlistToggle) {
-      onWatchlistToggle(movie); // Correct function call here
-    }
+    onWatchlistToggle(movie);
+    toast.success(`${movie.title} added to watchlist!`); // Show toast notification
+    setMenuOpen(false); // Close the menu after selecting an option
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
   };
 
   return (
@@ -36,13 +44,18 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle, onWatchl
         <h4>{movie.title}</h4>
         <p>{new Date(movie.release_date).getFullYear()}</p>
         <div className="movie-meta">
-          <button className="favorite-btn" onClick={handleFavoriteClick}>
-            ❤️
+          <button className="three-dot-btn" onClick={toggleMenu}>
+            ⋮
           </button>
-          {onWatchlistToggle && ( // Only render if onWatchlistToggle is passed
-            <button className="watchlist-btn" onClick={handleWatchlistClick}>
-              ⭐
-            </button>
+          {menuOpen && (
+            <div className="dropdown-menu">
+              <button className="favorite-btn" onClick={handleFavoriteClick}>
+                ❤️ Add to Favorites
+              </button>
+              <button className="watchlist-btn" onClick={handleWatchlistClick}>
+                ⭐ Add to Watchlist
+              </button>
+            </div>
           )}
         </div>
       </div>
