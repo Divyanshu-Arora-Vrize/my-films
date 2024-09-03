@@ -1,0 +1,44 @@
+.home-page {
+    font-family: 'Arial', sans-serif;
+    background-color: #000;
+    /* Dark background */
+    color: #fff;
+    /* White text */
+}
+
+.hero-section {
+    display: flex;
+    align-items: center;
+    background-image: url('./imagge.jpg');
+    /* Update with your image path */
+    background-size: cover;
+    background-position: center;
+    height: 60vh;
+    /* Adjust the height as needed */
+    padding: 40px;
+}
+
+.hero-content {
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent background for the content */
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    /* Adjust to your needs */
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    margin: 20px 0;
+    text-align: left;
+    padding-left: 20px;
+}

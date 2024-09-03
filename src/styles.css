@@ -1,0 +1,458 @@
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+/* HomePage Styles */
+.home-page {
+  background-color: #111;
+  color: #fff;
+}
+
+/* Hero Section */
+.hero-section {
+  height: 60vh;
+  background-image: url('./pages/imagge.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.hero-content h1 {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.cta-button {
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #ff4500;
+}
+
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #222;
+}
+
+.navbar-logo span {
+  font-size: 2rem;
+  color: #ffc107;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 30px;
+}
+
+.navbar-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+
+.navbar-links a:hover {
+  color: #ffc107;
+}
+
+/* SearchBar Styles */
+.search-bar {
+  display: flex;
+  justify-content: flex-start;
+  margin: 40px auto;
+  max-width: 600px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.search-input {
+  padding: 15px 20px;
+  font-size: 1.2rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  flex: 1;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.search-btn {
+  padding: 15px 20px;
+  font-size: 1.2rem;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 0 50px 50px 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-btn:hover {
+  background-color: #ffcd38;
+}
+
+/* MovieGrid Styles */
+.movie-carousel-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.movie-grid {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: 10px;
+}
+
+.movie-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.movie-card {
+  position: relative;
+  /* Ensure this is present */
+  min-width: 200px;
+  margin: 0 10px;
+  background-color: #333;
+  border-radius: 10px;
+  flex-shrink: 0;
+  height: 350px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.movie-poster {
+  z-index: 1;
+  width: 100%;
+  height: 75%;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+}
+
+.movie-info {
+  padding: 10px;
+  text-align: center;
+  height: 25%;
+}
+
+.movie-info h4 {
+  font-size: 1rem;
+  margin: 8px 0 5px;
+}
+
+/* Updated Movie Meta with Dropdown Positioned at the Bottom */
+.movie-meta {
+  position: absolute;
+  bottom: 10px;
+  /* Adjust the distance from the bottom */
+  width: calc(100% - 20px);
+  /* Ensure it fits within the card by subtracting padding */
+  padding: 0 10px;
+  /* Space for button */
+  display: flex;
+  justify-content: flex-end;
+  z-index: 10;
+}
+
+/* 3-Dot Button */
+.three-dot-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #ff6347;
+  /* Change this color to your desired color */
+  transition: transform 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  z-index: 20;
+  /* Ensure it's above other elements */
+}
+
+.dropdown-menu {
+  position: absolute;
+  bottom: 50px;
+  /* Position it above the button */
+  right: 10px;
+  /* Align with the button */
+  background-color: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-menu button {
+  background-color: transparent;
+  border: none;
+  color: #ffc107;
+  padding: 10px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-menu button:hover {
+  background-color: #444;
+}
+
+/* Button Styles */
+.favorite-btn,
+.watchlist-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #ffc107;
+  transition: transform 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.favorite-btn:hover,
+.watchlist-btn:hover {
+  color: #ffcd38;
+  transform: scale(1.2);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.favorite-btn:active,
+.watchlist-btn:active {
+  transform: scale(1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Arrow Styles */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  z-index: 10;
+  border-radius: 50%;
+  padding: 10px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.arrow:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.left-arrow {
+  left: 10px;
+}
+
+.right-arrow {
+  right: 10px;
+}
+
+/* Favorite Movies Styles */
+.favorite-movies {
+  padding: 20px;
+  text-align: center;
+}
+
+.favorite-movies h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #fff;
+}
+
+.favorite-movies .movie-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.movie-card .favorite-btn {
+  background-color: transparent;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.movie-card .favorite-btn:hover {
+  color: #ff4b4b;
+}
+
+.movie-card .movie-info h4 {
+  margin: 10px 0;
+}
+
+.movie-card .movie-info p {
+  margin: 0;
+  color: #777;
+}
+
+/* Footer Styles */
+.footer {
+  background-color: #1c1c1c;
+  padding: 20px 0;
+  text-align: center;
+  color: #f1f1f1;
+  font-size: 14px;
+  margin-top: 30px;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.footer-links {
+  margin-top: 10px;
+}
+
+.footer-link {
+  color: #f1f1f1;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Styles */
+
+/* For screens smaller than 1024px (Tablets and smaller devices) */
+@media (max-width: 1024px) {
+  .movie-grid {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .movie-card {
+    flex-basis: 45%;
+    margin: 10px;
+    height: auto;
+  }
+
+  .hero-content h1 {
+    font-size: 3rem;
+  }
+
+  .hero-content p {
+    font-size: 1.25rem;
+  }
+
+  .search-input,
+  .search-btn {
+    font-size: 1.1rem;
+  }
+
+  /* Adjust Dropdown for Smaller Screens */
+  .dropdown-menu {
+    right: -10px;
+  }
+}
+
+/* For screens smaller than 768px (Small tablets and large phones) */
+@media (max-width: 768px) {
+  .movie-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .movie-card {
+    flex-basis: 100%;
+    margin: 10px 0;
+    height: auto;
+  }
+
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-content p {
+    font-size: 1.1rem;
+  }
+
+  .search-input,
+  .search-btn {
+    font-size: 1rem;
+  }
+}
+
+/* For screens smaller than 480px (Mobile phones) */
+@media (max-width: 480px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .search-input,
+  .search-btn {
+    font-size: 0.9rem;
+  }
+
+  /* Adjust Dropdown for Mobile */
+  .dropdown-menu {
+    right: -15px;
+  }
+}
