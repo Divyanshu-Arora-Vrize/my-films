@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import MovieCard from './MovieCard';
 
 interface Movie {
@@ -15,16 +15,38 @@ interface MovieGridProps {
 }
 
 const MovieGrid: React.FC<MovieGridProps> = ({ movies, onFavoriteToggle, onWatchlistToggle }) => {
+  const movieGridRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollLeft = () => {
+    if (movieGridRef.current) {
+      movieGridRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const handleScrollRight = () => {
+    if (movieGridRef.current) {
+      movieGridRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="movie-grid">
-      {movies.map(movie => (
-        <MovieCard
-          key={movie.id}
-          movie={movie}
-          onFavoriteToggle={onFavoriteToggle}
-          onWatchlistToggle={onWatchlistToggle}
-        />
-      ))}
+    <div className="movie-carousel-container">
+      <button className="arrow left-arrow" onClick={handleScrollLeft}>
+        &lt;
+      </button>
+      <div className="movie-grid" ref={movieGridRef}>
+        {movies.map(movie => (
+          <MovieCard
+            key={movie.id}
+            movie={movie}
+            onFavoriteToggle={onFavoriteToggle}
+            onWatchlistToggle={onWatchlistToggle}
+          />
+        ))}
+      </div>
+      <button className="arrow right-arrow" onClick={handleScrollRight}>
+        &gt;
+      </button>
     </div>
   );
 };

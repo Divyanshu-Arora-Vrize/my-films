@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouse, faHeart, faStar, faSun, faMoon, faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons';
+import { faHouse, faHeart, faStar, faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons';
 import '../styles.css';
 
 const Navbar: React.FC = () => {
@@ -11,8 +11,8 @@ const Navbar: React.FC = () => {
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
-    document.body.className = newTheme; // Set the class on the body
-    localStorage.setItem('theme', newTheme); // Save theme to localStorage
+    document.body.className = newTheme;
+    localStorage.setItem('theme', newTheme);
   };
 
   // Load saved theme from localStorage
