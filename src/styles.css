@@ -12,8 +12,12 @@ body.dark {
 
 body.light {
   background-color: #f1f1f1;
-  color: #444343;
+  .hero-content{
+    color: #e8900b;
+  }
+  color: #454545;
 }
+
 
 /* HomePage Styles */
 .home-page {
