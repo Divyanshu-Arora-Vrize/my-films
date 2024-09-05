@@ -4,10 +4,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faHeart, faStar, faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons';
 import '../styles.css';
 
-const Navbar: React.FC = () => {
-  const [theme, setTheme] = useState('dark');
+// Custom Hook: useTheme
+const useTheme = () => {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  // Toggle theme
+  // Load saved theme from localStorage and set it on the body
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' || 'dark';
+    setTheme(savedTheme);
+    document.body.className = savedTheme;
+  }, []);
+
+  // Toggle theme and update body class and localStorage
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
@@ -15,12 +23,12 @@ const Navbar: React.FC = () => {
     localStorage.setItem('theme', newTheme);
   };
 
-  // Load saved theme from localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
-    document.body.className = savedTheme;
-  }, []);
+  return { theme, toggleTheme };
+};
+
+// Navbar Component
+const Navbar: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();  // Use the custom hook
 
   return (
     <nav className="navbar">
@@ -39,7 +47,6 @@ const Navbar: React.FC = () => {
         </Link>
         <button className="theme-toggle-btn" onClick={toggleTheme}>
           <FontAwesomeIcon icon={theme === 'dark' ? faToggleOff : faToggleOn} />
-
         </button>
       </div>
     </nav>
