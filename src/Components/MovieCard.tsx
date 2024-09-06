@@ -18,12 +18,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle, onWatchl
   const [menuOpen, setMenuOpen] = useState(false);
 
   const posterUrl = movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    ? movie.poster_path
     : 'https://via.placeholder.com/200x300?text=No+Image+Available';
 
-
   const movieTitle = movie.title || 'No Title Available';
-
 
   const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'No Release Date Available';
 

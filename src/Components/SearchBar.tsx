@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { fetchMovies } from '../services/movieApi';
+import { fetchMovies, fetchHomepageShows } from '../services/movieApi';
 import '../styles.css';
 
 interface Movie {
@@ -17,8 +17,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ setMovies }) => {
   const [query, setQuery] = useState<string>('');
 
   const handleSearch = async () => {
-    const results = await fetchMovies(query);
-    setMovies(results);
+    if (query.trim() === '') {
+      // Fetch homepage shows if search query is empty
+      const homepageShows = await fetchHomepageShows();
+      setMovies(homepageShows);
+    } else {
+      const results = await fetchMovies(query);
+      setMovies(results);
+    }
   };
 
   return (
@@ -29,6 +35,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ setMovies }) => {
         className="search-input"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
       />
       <button className="search-btn" onClick={handleSearch}>
         🔍

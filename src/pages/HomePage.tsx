@@ -3,7 +3,7 @@ import Navbar from '../Components/Navbar';
 import SearchBar from '../Components/SearchBar';
 import MovieGrid from '../Components/MovieGrid';
 import Footer from '../Components/Footer';
-import { fetchPopularMovies } from '../services/movieApi';
+import { fetchHomepageShows } from '../services/movieApi'; // Updated fetch call for homepage
 import '../styles.css';
 
 interface Movie {
@@ -15,12 +15,12 @@ interface Movie {
 
 const HomePage: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [watchlist, setWatchlist] = useState<Movie[]>([]); // Add watchlist state
+  const [watchlist, setWatchlist] = useState<Movie[]>([]);
 
-  // Fetch popular movies when the component mounts
+  // Fetch homepage shows when the component mounts
   useEffect(() => {
     const getMovies = async () => {
-      const fetchedMovies = await fetchPopularMovies();
+      const fetchedMovies = await fetchHomepageShows();
       setMovies(fetchedMovies);
     };
 
@@ -77,7 +77,6 @@ const HomePage: React.FC = () => {
       <h2 className="section-title">Movies</h2>
       <MovieGrid movies={movies} onFavoriteToggle={handleFavoriteToggle} onWatchlistToggle={handleWatchlistToggle} />
 
-      {/* Watchlist Section */}
       {watchlist.length > 0 && (
         <>
           <h2 className="section-title">Watchlist</h2>

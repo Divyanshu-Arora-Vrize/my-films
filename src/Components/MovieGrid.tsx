@@ -35,7 +35,7 @@ const MovieGrid: React.FC<MovieGridProps> = ({ movies, onFavoriteToggle, onWatch
         &lt;
       </button>
       <div className="movie-grid" ref={movieGridRef}>
-        {movies.map(movie => (
+        {movies.map((movie) => (
           <MovieCard
             key={movie.id}
             movie={movie}

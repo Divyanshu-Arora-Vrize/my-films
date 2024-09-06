@@ -26,9 +26,26 @@ body.light {
 }
 
 /* Hero Section */
+@keyframes backgroundAnimation {
+  0% {
+    background-image: url('./Components/image1.jpeg');
+  }
+
+  33% {
+    background-image: url('./Components/image2.jpeg');
+  }
+
+  66% {
+    background-image: url('./Components/image3.jpg');
+  }
+
+  100% {
+    background-image: url('./pages/imagge.jpg');
+  }
+}
+
 .hero-section {
   height: 60vh;
-  background-image: url('./pages/imagge.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -36,6 +53,8 @@ body.light {
   justify-content: center;
   text-align: center;
   color: inherit;
+  animation: backgroundAnimation 15s infinite;
+  /* 15s for 3 images */
 }
 
 .hero-content h1 {
