@@ -187,7 +187,7 @@ body.light .theme-toggle-btn:hover {
 }
 
 body.light .search-bar {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgb(250, 248, 248);
 }
 
 body.light .search-input::placeholder {
