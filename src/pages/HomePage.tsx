@@ -1,13 +1,11 @@
-import React, { useReducer, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import Navbar from '../Components/Navbar';
 import SearchBar from '../Components/SearchBar';
 import MovieGrid from '../Components/MovieGrid';
 import Footer from '../Components/Footer';
 import { fetchHomepageShows } from '../services/movieApi';
-import { toast } from 'react-toastify'; // Import toast for notifications
 import '../styles.css';
 
-// Define Movie type
 interface Movie {
   id: number;
   title: string;
@@ -15,83 +13,72 @@ interface Movie {
   poster_path: string;
 }
 
-// Define initial state structure
-interface State {
-  movies: Movie[];
-  favoriteMovies: Movie[]; // Add favorites
-  watchlist: Movie[]; // Add watchlist
-}
+// Action types for reducer
+type ActionType =
+  | { type: 'ADD_MOVIE'; payload: Movie }
+  | { type: 'REMOVE_MOVIE'; payload: number };
 
-// Define action types
-type Action =
-  | { type: 'SET_MOVIES'; payload: Movie[] }
-  | { type: 'ADD_TO_FAVORITES'; payload: Movie }
-  | { type: 'REMOVE_FROM_FAVORITES'; payload: Movie }
-  | { type: 'ADD_TO_WATCHLIST'; payload: Movie }
-  | { type: 'REMOVE_FROM_WATCHLIST'; payload: Movie };
-
-// Define initial state
-const initialState: State = {
-  movies: [],
-  favoriteMovies: [], // Add favorites
-  watchlist: [], // Add watchlist
+// Watchlist reducer
+const watchlistReducer = (state: Movie[], action: ActionType): Movie[] => {
+  switch (action.type) {
+    case 'ADD_MOVIE':
+      return state.some(movie => movie.id === action.payload.id)
+        ? state
+        : [...state, action.payload];
+    case 'REMOVE_MOVIE':
+      return state.filter(movie => movie.id !== action.payload);
+    default:
+      return state;
+  }
 };
 
-// Define reducer
-const reducer = (state: State, action: Action): State => {
+// Favorites reducer
+const favoritesReducer = (state: Movie[], action: ActionType): Movie[] => {
   switch (action.type) {
-    case 'SET_MOVIES':
-      return { ...state, movies: action.payload };
-    case 'ADD_TO_FAVORITES':
-      return { ...state, favoriteMovies: [...state.favoriteMovies, action.payload] };
-    case 'REMOVE_FROM_FAVORITES':
-      return {
-        ...state,
-        favoriteMovies: state.favoriteMovies.filter(movie => movie.id !== action.payload.id),
-      };
-    case 'ADD_TO_WATCHLIST':
-      return { ...state, watchlist: [...state.watchlist, action.payload] };
-    case 'REMOVE_FROM_WATCHLIST':
-      return {
-        ...state,
-        watchlist: state.watchlist.filter(movie => movie.id !== action.payload.id),
-      };
+    case 'ADD_MOVIE':
+      return state.some(movie => movie.id === action.payload.id)
+        ? state
+        : [...state, action.payload];
+    case 'REMOVE_MOVIE':
+      return state.filter(movie => movie.id !== action.payload);
     default:
       return state;
   }
 };
 
 const HomePage: React.FC = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [watchlist, dispatchWatchlist] = useReducer(watchlistReducer, []);
+  const [favorites, dispatchFavorites] = useReducer(favoritesReducer, []);
 
+  // Fetch homepage shows when the component mounts
   useEffect(() => {
-    const fetchMovies = async () => {
-      const movies = await fetchHomepageShows();
-      dispatch({ type: 'SET_MOVIES', payload: movies });
+    const getMovies = async () => {
+      const fetchedMovies = await fetchHomepageShows();
+      setMovies(fetchedMovies);
     };
 
-    fetchMovies();
+    getMovies();
   }, []);
 
-  const handleFavoriteToggle = (movie: Movie) => {
-    const isFavorite = state.favoriteMovies.some(favMovie => favMovie.id === movie.id);
-    if (isFavorite) {
-      dispatch({ type: 'REMOVE_FROM_FAVORITES', payload: movie });
-      toast.error(`${movie.title} removed from favorites`);
+  // Handle adding/removing a movie to/from the watchlist
+  const handleWatchlistToggle = (movie: Movie) => {
+    const isInWatchlist = watchlist.some(wlMovie => wlMovie.id === movie.id);
+    if (isInWatchlist) {
+      dispatchWatchlist({ type: 'REMOVE_MOVIE', payload: movie.id });
     } else {
-      dispatch({ type: 'ADD_TO_FAVORITES', payload: movie });
-      toast.success(`${movie.title} added to favorites`);
+      dispatchWatchlist({ type: 'ADD_MOVIE', payload: movie });
     }
   };
 
-  const handleWatchlistToggle = (movie: Movie) => {
-    const isInWatchlist = state.watchlist.some(watchlistMovie => watchlistMovie.id === movie.id);
-    if (isInWatchlist) {
-      dispatch({ type: 'REMOVE_FROM_WATCHLIST', payload: movie });
-      toast.error(`${movie.title} removed from watchlist`);
+  // Handle adding/removing a movie to/from the favorites
+  const handleFavoriteToggle = (movie: Movie) => {
+    console.log('Toggling favorite:', movie.title);
+    const isFavorite = favorites.some(favMovie => favMovie.id === movie.id);
+    if (isFavorite) {
+      dispatchFavorites({ type: 'REMOVE_MOVIE', payload: movie.id });
     } else {
-      dispatch({ type: 'ADD_TO_WATCHLIST', payload: movie });
-      toast.success(`${movie.title} added to watchlist`);
+      dispatchFavorites({ type: 'ADD_MOVIE', payload: movie });
     }
   };
 
@@ -100,22 +87,40 @@ const HomePage: React.FC = () => {
       <Navbar />
       <div className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to Movie Finder</h1>
-          <p>Find your favorite Movies & Series</p>
-          <SearchBar
-            setMovies={(movies: Movie[]) =>
-              dispatch({ type: 'SET_MOVIES', payload: movies })
-            }
-          />
+          <h1>Welcome to My Films,</h1>
+          <p>Your favorite Movies & Series all in one place</p>
+          <SearchBar setMovies={setMovies} />
         </div>
       </div>
 
-      <h2 className="section-title">Trending Movies</h2>
+      <h2 className="section-title">Movies</h2>
       <MovieGrid
-        movies={state.movies}
-        onFavoriteToggle={handleFavoriteToggle} // Handle the favorite toggle
-        onWatchlistToggle={handleWatchlistToggle} // Handle the watchlist toggle
+        movies={movies}
+        onFavoriteToggle={handleFavoriteToggle}
+        onWatchlistToggle={handleWatchlistToggle}
       />
+
+      {watchlist.length > 0 && (
+        <>
+          <h2 className="section-title">Watchlist</h2>
+          <MovieGrid
+            movies={watchlist}
+            onFavoriteToggle={handleFavoriteToggle}
+            onWatchlistToggle={handleWatchlistToggle}
+          />
+        </>
+      )}
+
+      {favorites.length > 0 && (
+        <>
+          <h2 className="section-title">Favorite Movies</h2>
+          <MovieGrid
+            movies={favorites}
+            onFavoriteToggle={handleFavoriteToggle}
+            onWatchlistToggle={handleWatchlistToggle}
+          />
+        </>
+      )}
 
       <Footer />
     </div>

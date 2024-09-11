@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface Movie {
   id: number;
@@ -21,20 +22,20 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle, onWatchl
     : 'https://via.placeholder.com/200x300?text=No+Image+Available';
 
   const movieTitle = movie.title || 'No Title Available';
+
   const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'No Release Date Available';
 
-const handleFavoriteClick = () => {
-  //console.log('Favorite button clicked for:', movie); // <-- Added log
-  onFavoriteToggle(movie);
-  setMenuOpen(false);
-};
+  const handleFavoriteClick = () => {
+    onFavoriteToggle(movie);
+    toast.success(`${movieTitle} added to favorites!`);
+    setMenuOpen(false);
+  };
 
-const handleWatchlistClick = () => {
- // console.log('Watchlist button clicked for:', movie); // <-- Added log
-  onWatchlistToggle(movie);
-  setMenuOpen(false);
-};
-
+  const handleWatchlistClick = () => {
+    onWatchlistToggle(movie);
+    toast.success(`${movieTitle} added to watchlist!`);
+    setMenuOpen(false);
+  };
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -53,7 +54,7 @@ const handleWatchlistClick = () => {
           {menuOpen && (
             <div className="dropdown-menu">
               <button className="favorite-btn" onClick={handleFavoriteClick}>
-                ❤️ Add to Favorite
+                ❤️ Add to Favorites
               </button>
               <button className="watchlist-btn" onClick={handleWatchlistClick}>
                 ⭐ Add to Watchlist

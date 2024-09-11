@@ -1,4 +1,4 @@
-import React, { useReducer, useRef } from 'react';
+import React, { useRef } from 'react';
 import MovieCard from './MovieCard';
 
 interface Movie {
@@ -14,41 +14,17 @@ interface MovieGridProps {
   onWatchlistToggle: (movie: Movie) => void;
 }
 
-const initialState = {
-  scrollPosition: 0
-};
-
-const reducer = (state: typeof initialState, action: { type: string; payload?: number }) => {
-  switch (action.type) {
-    case 'SCROLL_LEFT':
-      return {
-        ...state,
-        scrollPosition: state.scrollPosition - (action.payload || 301),
-      };
-    case 'SCROLL_RIGHT':
-      return {
-        ...state,
-        scrollPosition: state.scrollPosition + (action.payload || 301),
-      };
-    default:
-      return state;
-  }
-};
-
 const MovieGrid: React.FC<MovieGridProps> = ({ movies, onFavoriteToggle, onWatchlistToggle }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
   const movieGridRef = useRef<HTMLDivElement>(null);
 
   const handleScrollLeft = () => {
     if (movieGridRef.current) {
-      dispatch({ type: 'SCROLL_LEFT', payload: 301 });
       movieGridRef.current.scrollBy({ left: -301, behavior: 'smooth' });
     }
   };
 
   const handleScrollRight = () => {
     if (movieGridRef.current) {
-      dispatch({ type: 'SCROLL_RIGHT', payload: 301 });
       movieGridRef.current.scrollBy({ left: 301, behavior: 'smooth' });
     }
   };
