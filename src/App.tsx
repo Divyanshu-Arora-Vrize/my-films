@@ -18,7 +18,8 @@ const App: React.FC = () => {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} /> {/* Privacy Policy route */}
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} /> {/* Terms and Conditions route */}
       </Routes>
-      <ToastContainer position="bottom-right" autoClose={3000} /> {/* Toast container */}
+      {/* ToastContainer ensures toasts are shown across the entire app */}
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </Router>
   );
 };

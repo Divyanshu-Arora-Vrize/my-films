@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import MovieCard from './MovieCard';
+import React, { useReducer, useEffect } from 'react';
 import Navbar from './Navbar';
-import SearchBar from './SearchBar'; // Import SearchBar component
-import Footer from './Footer'; // Import Footer component
-import '../styles.css';
+import SearchBar from './SearchBar';
+import MovieCard from './MovieCard';
+import Footer from './Footer';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
+// Define Movie type
 interface Movie {
   id: number;
   title: string;
@@ -12,34 +14,75 @@ interface Movie {
   poster_path: string;
 }
 
+// Define initial state structure
+interface State {
+  watchlistMovies: Movie[];
+  movies: Movie[];
+}
+
+// Define action types
+type Action =
+  | { type: 'LOAD_WATCHLIST'; payload: Movie[] }
+  | { type: 'ADD_TO_WATCHLIST'; payload: Movie }
+  | { type: 'REMOVE_FROM_WATCHLIST'; payload: Movie }
+  | { type: 'SET_MOVIES'; payload: Movie[] };
+
+// Define initial state
+const initialState: State = {
+  watchlistMovies: [],
+  movies: [],
+};
+
+// Define reducer
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'LOAD_WATCHLIST':
+      return {
+        ...state,
+        watchlistMovies: action.payload,
+      };
+    case 'ADD_TO_WATCHLIST':
+      return {
+        ...state,
+        watchlistMovies: [...state.watchlistMovies, action.payload],
+      };
+    case 'REMOVE_FROM_WATCHLIST':
+      return {
+        ...state,
+        watchlistMovies: state.watchlistMovies.filter(
+          (movie) => movie.id !== action.payload.id
+        ),
+      };
+    case 'SET_MOVIES':
+      return {
+        ...state,
+        movies: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+
 const Watchlist: React.FC = () => {
-  const [watchlistMovies, setWatchlistMovies] = useState<Movie[]>([]);
-  const [movies, setMovies] = useState<Movie[]>([]); // To handle search results
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    // Retrieve the watchlist from localStorage
-    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setWatchlistMovies(savedWatchlist);
+    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]') as Movie[];
+    dispatch({ type: 'LOAD_WATCHLIST', payload: savedWatchlist });
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('watchlist', JSON.stringify(state.watchlistMovies));
+  }, [state.watchlistMovies]);
+
   const handleWatchlistToggle = (movie: Movie) => {
-    // Remove the movie from the watchlist
-    const updatedWatchlist = watchlistMovies.filter(watchMovie => watchMovie.id !== movie.id);
-    setWatchlistMovies(updatedWatchlist);
-    localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
-  };
-
-  const handleFavoriteToggle = (movie: Movie) => {
-    // If you need to implement the favorite toggle, do so here.
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const isFavorite = favorites.some((favMovie: Movie) => favMovie.id === movie.id);
-
-    if (isFavorite) {
-      const updatedFavorites = favorites.filter((favMovie: Movie) => favMovie.id !== movie.id);
-      localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    const isInWatchlist = state.watchlistMovies.some(watchlistMovie => watchlistMovie.id === movie.id);
+    if (isInWatchlist) {
+      dispatch({ type: 'REMOVE_FROM_WATCHLIST', payload: movie });
+      toast.error(`${movie.title} removed from watchlist`);
     } else {
-      favorites.push(movie);
-      localStorage.setItem('favorites', JSON.stringify(favorites));
+      dispatch({ type: 'ADD_TO_WATCHLIST', payload: movie });
+      toast.success(`${movie.title} added to watchlist`);
     }
   };
 
@@ -48,39 +91,48 @@ const Watchlist: React.FC = () => {
       <Navbar />
       <div className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to My Watchlist</h1>
-          <p>All the movies and series you want to watch</p>
-          <SearchBar setMovies={setMovies} /> {/* Search functionality */}
+          <h1>Your Watchlist</h1>
+          <p>All the Movies & Series you want to watch</p>
+          <SearchBar
+            setMovies={(movies: Movie[]) =>
+              dispatch({ type: 'SET_MOVIES', payload: movies })
+            }
+          />
         </div>
       </div>
 
-      <h2 className="section-title">My Watchlist</h2>
+      {state.movies.length > 0 && (
+        <>
+          <h2 className="section-title">Search Results</h2>
+          <div className="movie-grid">
+            {state.movies.map((movie) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onFavoriteToggle={() => {}} // Optionally you can manage favorites here as well
+                onWatchlistToggle={handleWatchlistToggle}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
+      <h2 className="section-title">Your Watchlist</h2>
       <div className="movie-grid">
-        {movies.length > 0 ? (
-          movies.map(movie => (
+        {state.watchlistMovies.length > 0 ? (
+          state.watchlistMovies.map((movie) => (
             <MovieCard
               key={movie.id}
               movie={movie}
+              onFavoriteToggle={() => {}} // Optionally manage favorites
               onWatchlistToggle={handleWatchlistToggle}
-              onFavoriteToggle={handleFavoriteToggle}
-            />
-          ))
-        ) : watchlistMovies.length > 0 ? (
-          watchlistMovies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onWatchlistToggle={handleWatchlistToggle}
-              onFavoriteToggle={handleFavoriteToggle}
             />
           ))
         ) : (
-          <p className="empty-message">No movies in your watchlist yet.</p>
+          <p>No movies in your watchlist yet.</p>
         )}
       </div>
-
-      <Footer /> {/* Add the Footer */}
+      <Footer />
     </div>
   );
 };

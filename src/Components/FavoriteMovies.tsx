@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import MovieCard from './MovieCard';
 import Navbar from './Navbar';
-import SearchBar from './SearchBar';
 import Footer from './Footer';
-import '../styles.css'; // Importing global styles
-import { toast } from 'react-toastify'; // Importing toast for notifications
-import 'react-toastify/dist/ReactToastify.css'; // Importing toast styles
+import SearchBar from './SearchBar';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Movie {
   id: number;
@@ -14,37 +13,78 @@ interface Movie {
   poster_path: string;
 }
 
-const FavoriteMovies: React.FC = () => {
-  const [favoriteMovies, setFavoriteMovies] = useState<Movie[]>([]);
-  const [movies, setMovies] = useState<Movie[]>([]); // To handle search results
-  const [watchlist, setWatchlist] = useState<Movie[]>([]); // State for watchlist
+interface State {
+  favoriteMovies: Movie[];
+  movies: Movie[];
+}
 
+type Action =
+  | { type: 'LOAD_SAVED_DATA'; payload: { favorites: Movie[] } }
+  | { type: 'ADD_TO_FAVORITES'; payload: Movie }
+  | { type: 'REMOVE_FROM_FAVORITES'; payload: Movie }
+  | { type: 'SET_MOVIES'; payload: Movie[] };
+
+const initialState: State = {
+  favoriteMovies: [],
+  movies: [],
+};
+
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'ADD_TO_FAVORITES':
+      const updatedFavorites = [...state.favoriteMovies, action.payload];
+      console.log('New favorites array after adding:', updatedFavorites); // <-- Log after update
+      return {
+        ...state,
+        favoriteMovies: updatedFavorites,
+      };
+    case 'REMOVE_FROM_FAVORITES':
+      const filteredFavorites = state.favoriteMovies.filter(
+        (movie) => movie.id !== action.payload.id
+      );
+      console.log('New favorites array after removing:', filteredFavorites); // <-- Log after update
+      return {
+        ...state,
+        favoriteMovies: filteredFavorites,
+      };
+    default:
+      return state;
+  }
+};
+
+
+
+const FavoriteMovies: React.FC = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  // Load saved favorite movies from localStorage
   useEffect(() => {
-    const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setFavoriteMovies(savedFavorites);
-    setWatchlist(savedWatchlist);
+    const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]') as Movie[];
+    dispatch({
+      type: 'LOAD_SAVED_DATA',
+      payload: { favorites: savedFavorites },
+    });
   }, []);
 
+  // Update localStorage when favoriteMovies state changes
+  useEffect(() => {
+  localStorage.setItem('favorites', JSON.stringify(state.favoriteMovies));
+  console.log('Updated localStorage with favoriteMovies:', state.favoriteMovies); // <-- Added log
+}, [state.favoriteMovies]);
+
   const handleFavoriteToggle = (movie: Movie) => {
-    const updatedFavorites = favoriteMovies.some(favMovie => favMovie.id === movie.id)
-      ? favoriteMovies.filter(favMovie => favMovie.id !== movie.id)
-      : [...favoriteMovies, movie];
+  console.log('Toggling favorite for movie:', movie); // <-- Added log
 
-    setFavoriteMovies(updatedFavorites);
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    toast(updatedFavorites.some(favMovie => favMovie.id === movie.id) ? 'Added to favorites' : 'Removed from favorites');
-  };
+  const isFavorite = state.favoriteMovies.some(favMovie => favMovie.id === movie.id);
+  if (isFavorite) {
+    dispatch({ type: 'REMOVE_FROM_FAVORITES', payload: movie });
+    toast.error(`${movie.title} removed from favorites`);
+  } else {
+    dispatch({ type: 'ADD_TO_FAVORITES', payload: movie });
+    toast.success(`${movie.title} added to favorites`);
+  }
+};
 
-  const handleWatchlistToggle = (movie: Movie) => {
-    const updatedWatchlist = watchlist.some(watchlistMovie => watchlistMovie.id === movie.id)
-      ? watchlist.filter(watchlistMovie => watchlistMovie.id !== movie.id)
-      : [...watchlist, movie];
-
-    setWatchlist(updatedWatchlist);
-    localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
-    toast(updatedWatchlist.some(watchlistMovie => watchlistMovie.id === movie.id) ? 'Added to watchlist' : 'Removed from watchlist');
-  };
 
   return (
     <div className="favorite-movies-page">
@@ -53,36 +93,45 @@ const FavoriteMovies: React.FC = () => {
         <div className="hero-content">
           <h1>Welcome to My Favorite Movies</h1>
           <p>Your favorite Movies & Series all in one place</p>
-          <SearchBar setMovies={setMovies} /> {/* Search functionality */}
+          <SearchBar
+            setMovies={(movies: Movie[]) =>
+              dispatch({ type: 'SET_MOVIES', payload: movies })
+            }
+          />
         </div>
       </div>
 
-      <h2 className="section-title">Favorite Movies</h2>
+      {state.movies.length > 0 && (
+        <>
+          <h2 className="section-title">Search Results</h2>
+          <div className="movie-grid">
+            {state.movies.map((movie) => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onFavoriteToggle={handleFavoriteToggle}
+                onWatchlistToggle={() => {}}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
+      <h2 className="section-title">Favorite Movies</h2>
       <div className="movie-grid">
-        {movies.length > 0 ? (
-          movies.map(movie => (
+        {state.favoriteMovies.length > 0 ? (
+          state.favoriteMovies.map((movie) => (
             <MovieCard
               key={movie.id}
               movie={movie}
               onFavoriteToggle={handleFavoriteToggle}
-              onWatchlistToggle={handleWatchlistToggle}
-            />
-          ))
-        ) : favoriteMovies.length > 0 ? (
-          favoriteMovies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onFavoriteToggle={handleFavoriteToggle}
-              onWatchlistToggle={handleWatchlistToggle}
+              onWatchlistToggle={() => {}}
             />
           ))
         ) : (
           <p>No favorite movies yet.</p>
         )}
       </div>
-
       <Footer />
     </div>
   );
