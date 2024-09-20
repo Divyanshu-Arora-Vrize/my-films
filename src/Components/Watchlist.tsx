@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useQuery } from '@apollo/client';
+import { GET_WATCHLIST_MOVIES } from '../queries/moviesQueriesW';
 import MovieCard from './MovieCard';
 import Navbar from './Navbar';
-import SearchBar from './SearchBar'; // Import SearchBar component
-import Footer from './Footer'; // Import Footer component
+import SearchBar from './SearchBar';
+import Footer from './Footer';
 import '../styles.css';
 
 interface Movie {
@@ -10,38 +12,28 @@ interface Movie {
   title: string;
   release_date: string;
   poster_path: string;
+  media_type: string;
 }
 
-const Watchlist: React.FC = () => {
-  const [watchlistMovies, setWatchlistMovies] = useState<Movie[]>([]);
-  const [movies, setMovies] = useState<Movie[]>([]); // To handle search results
+interface WatchlistProps {
+  watchlistMovies: Movie[];
+  onWatchlistToggle: (movie: Movie) => void;
+  onFavoriteToggle: (movie: Movie) => void;
+}
+
+const Watchlist: React.FC<WatchlistProps> = ({ watchlistMovies, onWatchlistToggle, onFavoriteToggle }) => {
+  const [movies, setMovies] = useState<Movie[]>(watchlistMovies);
+
+  const { loading, error, data } = useQuery(GET_WATCHLIST_MOVIES);
 
   useEffect(() => {
-    // Retrieve the watchlist from localStorage
-    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setWatchlistMovies(savedWatchlist);
-  }, []);
-
-  const handleWatchlistToggle = (movie: Movie) => {
-    // Remove the movie from the watchlist
-    const updatedWatchlist = watchlistMovies.filter(watchMovie => watchMovie.id !== movie.id);
-    setWatchlistMovies(updatedWatchlist);
-    localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
-  };
-
-  const handleFavoriteToggle = (movie: Movie) => {
-    // If you need to implement the favorite toggle, do so here.
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const isFavorite = favorites.some((favMovie: Movie) => favMovie.id === movie.id);
-
-    if (isFavorite) {
-      const updatedFavorites = favorites.filter((favMovie: Movie) => favMovie.id !== movie.id);
-      localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    } else {
-      favorites.push(movie);
-      localStorage.setItem('favorites', JSON.stringify(favorites));
+    if (data && data.watchlist_movies) {
+      setMovies(data.watchlist_movies);
     }
-  };
+  }, [data]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error fetching watchlist: {error.message}</p>;
 
   return (
     <div className="watchlist-page">
@@ -50,7 +42,7 @@ const Watchlist: React.FC = () => {
         <div className="hero-content">
           <h1>Welcome to My Watchlist</h1>
           <p>All the movies and series you want to watch</p>
-          <SearchBar setMovies={setMovies} /> {/* Search functionality */}
+          <SearchBar setMovies={setMovies} />
         </div>
       </div>
 
@@ -62,17 +54,8 @@ const Watchlist: React.FC = () => {
             <MovieCard
               key={movie.id}
               movie={movie}
-              onWatchlistToggle={handleWatchlistToggle}
-              onFavoriteToggle={handleFavoriteToggle}
-            />
-          ))
-        ) : watchlistMovies.length > 0 ? (
-          watchlistMovies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onWatchlistToggle={handleWatchlistToggle}
-              onFavoriteToggle={handleFavoriteToggle}
+              onWatchlistToggle={onWatchlistToggle}
+              onFavoriteToggle={onFavoriteToggle}
             />
           ))
         ) : (
@@ -80,7 +63,7 @@ const Watchlist: React.FC = () => {
         )}
       </div>
 
-      <Footer /> {/* Add the Footer */}
+      <Footer />
     </div>
   );
 };
