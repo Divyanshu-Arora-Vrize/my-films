@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,7 +11,7 @@ interface Movie {
   title: string;
   release_date: string;
   poster_path: string;
-  media_type?: string; // Optional media_type to avoid mismatches
+  media_type?: string;  // Optional media_type to align with localStorage data
 }
 
 const App: React.FC = () => {
@@ -51,7 +51,7 @@ const App: React.FC = () => {
           path="/favorites"
           element={
             <FavoriteMovies
-              favoriteMovies={favoriteMovies} // Pass favoriteMovies prop
+              favoriteMovies={favoriteMovies} // Fixed the missing prop
               onFavoriteToggle={handleFavoriteToggle}
               onWatchlistToggle={handleWatchlistToggle}
             />
@@ -61,16 +61,14 @@ const App: React.FC = () => {
           path="/watchlist"
           element={
             <Watchlist
-              watchlistMovies={watchlistMovies} // Pass watchlistMovies prop
+              watchlistMovies={watchlistMovies}
               onWatchlistToggle={handleWatchlistToggle}
               onFavoriteToggle={handleFavoriteToggle}
             />
           }
         />
-        <Route path="/favorites" element={<FavoriteMovies />} />
-        <Route path="/watchlist" element={<Watchlist />} />
       </Routes>
-      <ToastContainer position="bottom-right" autoClose={3000} /> {/* Toast container */}
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </Router>
   );
 };
