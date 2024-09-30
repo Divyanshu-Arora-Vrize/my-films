@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_FAVORITE_MOVIES } from '../queries/moviesQueries';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_FAVORITE_MOVIES, ADD_FAVORITE_MOVIE, REMOVE_FAVORITE_MOVIE } from '../queries/moviesQueries';
 import MovieCard from './MovieCard';
 import Navbar from './Navbar';
 import SearchBar from './SearchBar';
@@ -15,22 +15,45 @@ interface Movie {
 }
 
 interface FavoriteMoviesProps {
-  favoriteMovies: Movie[];
   onFavoriteToggle: (movie: Movie) => void;
   onWatchlistToggle: (movie: Movie) => void;
 }
 
-const FavoriteMovies: React.FC<FavoriteMoviesProps> = ({ favoriteMovies, onFavoriteToggle, onWatchlistToggle }) => {
-  const [movies, setMovies] = useState<Movie[]>(favoriteMovies);
+const FavoriteMovies: React.FC<FavoriteMoviesProps> = ({ onFavoriteToggle, onWatchlistToggle }) => {
+  const [movies, setMovies] = useState<Movie[]>([]);
 
   // Apollo useQuery hook to fetch data from Hasura
   const { loading, error, data } = useQuery(GET_FAVORITE_MOVIES);
+
+  // Apollo useMutation hooks for adding/removing favorite movies
+  const [addFavoriteMovie] = useMutation(ADD_FAVORITE_MOVIE);
+  const [removeFavoriteMovie] = useMutation(REMOVE_FAVORITE_MOVIE);
 
   useEffect(() => {
     if (data && data.favorite_movies) {
       setMovies(data.favorite_movies);
     }
   }, [data]);
+
+  const handleFavoriteToggle = async (movie: Movie) => {
+    const isFavorite = movies.some(favMovie => favMovie.id === movie.id);
+
+    if (isFavorite) {
+      await removeFavoriteMovie({ variables: { id: movie.id } });
+      setMovies(prevMovies => prevMovies.filter(m => m.id !== movie.id));
+    } else {
+      await addFavoriteMovie({
+        variables: {
+          id: movie.id,
+          title: movie.title,
+          release_date: movie.release_date,
+          poster_path: movie.poster_path,
+          media_type: movie.media_type,
+        },
+      });
+      setMovies(prevMovies => [...prevMovies, movie]);
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error fetching data: {error.message}</p>;
@@ -54,7 +77,7 @@ const FavoriteMovies: React.FC<FavoriteMoviesProps> = ({ favoriteMovies, onFavor
             <MovieCard
               key={movie.id}
               movie={movie}
-              onFavoriteToggle={onFavoriteToggle}
+              onFavoriteToggle={() => handleFavoriteToggle(movie)}
               onWatchlistToggle={onWatchlistToggle}
             />
           ))

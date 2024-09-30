@@ -16,13 +16,12 @@ interface Movie {
 }
 
 interface WatchlistProps {
-  watchlistMovies: Movie[];
   onWatchlistToggle: (movie: Movie) => void;
   onFavoriteToggle: (movie: Movie) => void;
 }
 
-const Watchlist: React.FC<WatchlistProps> = ({ watchlistMovies, onWatchlistToggle, onFavoriteToggle }) => {
-  const [movies, setMovies] = useState<Movie[]>(watchlistMovies);
+const Watchlist: React.FC<WatchlistProps> = ({ onWatchlistToggle, onFavoriteToggle }) => {
+  const [movies, setMovies] = useState<Movie[]>([]);
 
   const { loading, error, data } = useQuery(GET_WATCHLIST_MOVIES);
 

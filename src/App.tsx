@@ -1,75 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import HomePage from './pages/HomePage';
-import FavoriteMovies from './Components/FavoriteMovies';
-import Watchlist from './Components/Watchlist';
-
-interface Movie {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
-  media_type?: string;  // Optional media_type to align with localStorage data
-}
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import HomePage from '../src/pages/HomePage';
+import FavoriteMovies from '../src/Components/FavoriteMovies';
+import Watchlist from '../src/Components/Watchlist';
+import { ApolloWrapper } from './apolloClient';
+import { Movie } from './types';
 
 const App: React.FC = () => {
   const [favoriteMovies, setFavoriteMovies] = useState<Movie[]>([]);
-  const [watchlistMovies, setWatchlistMovies] = useState<Movie[]>([]);
-
-  useEffect(() => {
-    const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setFavoriteMovies(savedFavorites);
-    setWatchlistMovies(savedWatchlist);
-  }, []);
+  const [watchlist, setWatchlist] = useState<Movie[]>([]);
 
   const handleFavoriteToggle = (movie: Movie) => {
-    const updatedFavorites = favoriteMovies.some(favMovie => favMovie.id === movie.id)
-      ? favoriteMovies.filter(favMovie => favMovie.id !== movie.id)
-      : [...favoriteMovies, movie];
-
-    setFavoriteMovies(updatedFavorites);
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    const isFavorite = favoriteMovies.some(favMovie => favMovie.id === movie.id);
+    if (isFavorite) {
+      setFavoriteMovies(prevMovies => prevMovies.filter(m => m.id !== movie.id));
+    } else {
+      setFavoriteMovies(prevMovies => [...prevMovies, movie]);
+    }
   };
 
   const handleWatchlistToggle = (movie: Movie) => {
-    const updatedWatchlist = watchlistMovies.some(watchlistMovie => watchlistMovie.id === movie.id)
-      ? watchlistMovies.filter(watchlistMovie => watchlistMovie.id !== movie.id)
-      : [...watchlistMovies, movie];
-
-    setWatchlistMovies(updatedWatchlist);
-    localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+    const isOnWatchlist = watchlist.some(watchMovie => watchMovie.id === movie.id);
+    if (isOnWatchlist) {
+      setWatchlist(prevMovies => prevMovies.filter(m => m.id !== movie.id));
+    } else {
+      setWatchlist(prevMovies => [...prevMovies, movie]);
+    }
   };
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route
-          path="/favorites"
-          element={
-            <FavoriteMovies
-              favoriteMovies={favoriteMovies} // Fixed the missing prop
-              onFavoriteToggle={handleFavoriteToggle}
-              onWatchlistToggle={handleWatchlistToggle}
-            />
-          }
-        />
-        <Route
-          path="/watchlist"
-          element={
-            <Watchlist
-              watchlistMovies={watchlistMovies}
-              onWatchlistToggle={handleWatchlistToggle}
-              onFavoriteToggle={handleFavoriteToggle}
-            />
-          }
-        />
-      </Routes>
-      <ToastContainer position="bottom-right" autoClose={3000} />
-    </Router>
+    <ApolloWrapper>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomePage
+                onFavoriteToggle={handleFavoriteToggle}
+                onWatchlistToggle={handleWatchlistToggle}
+              />
+            }
+          />
+          <Route
+            path="/favorites"
+            element={
+              <FavoriteMovies
+                onFavoriteToggle={handleFavoriteToggle}
+                onWatchlistToggle={handleWatchlistToggle}
+              />
+            }
+          />
+          <Route
+            path="/watchlist"
+            element={
+              <Watchlist
+                onFavoriteToggle={handleFavoriteToggle}
+                onWatchlistToggle={handleWatchlistToggle}
+              />
+            }
+          />
+        </Routes>
+      </Router>
+    </ApolloWrapper>
   );
 };
 

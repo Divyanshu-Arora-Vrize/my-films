@@ -24,7 +24,7 @@ const authLink = setContext((_, { headers }) => {
 // Initialize the Apollo Client with authLink and httpLink
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(), // Configure caching as needed
+  cache: new InMemoryCache(),
 });
 
 // Define ApolloWrapper with proper typing for children
@@ -35,3 +35,5 @@ interface ApolloWrapperProps {
 export const ApolloWrapper: React.FC<ApolloWrapperProps> = ({ children }) => {
   return <ApolloProvider client={client}>{children}</ApolloProvider>;
 };
+
+export default client;
