@@ -6,13 +6,17 @@ import Navbar from './Navbar';
 import SearchBar from './SearchBar';
 import Footer from './Footer';
 
-interface Movie {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
-  media_type: string;
-}
+// In a file inside src/components
+import { Movie } from '../types';
+
+
+// interface Movie {
+//   id: number;
+//   title: string;
+//   release_date: string;
+//   poster_path: string;
+//   media_type: string;
+// }
 
 interface FavoriteMoviesProps {
   onFavoriteToggle: (movie: Movie) => void;
@@ -30,8 +34,8 @@ const FavoriteMovies: React.FC<FavoriteMoviesProps> = ({ onFavoriteToggle, onWat
   const [removeFavoriteMovie] = useMutation(REMOVE_FAVORITE_MOVIE);
 
   useEffect(() => {
-    if (data && data.favorite_movies) {
-      setMovies(data.favorite_movies);
+    if (data && data.FavoriteMovies) {
+      setMovies(data.FavoriteMovies);
     }
   }, [data]);
 
@@ -39,19 +43,31 @@ const FavoriteMovies: React.FC<FavoriteMoviesProps> = ({ onFavoriteToggle, onWat
     const isFavorite = movies.some(favMovie => favMovie.id === movie.id);
 
     if (isFavorite) {
-      await removeFavoriteMovie({ variables: { id: movie.id } });
-      setMovies(prevMovies => prevMovies.filter(m => m.id !== movie.id));
+      // Remove from favorites
+      try {
+        await removeFavoriteMovie({ variables: { id: movie.id } });
+        setMovies(prevMovies => prevMovies.filter(m => m.id !== movie.id));
+      } catch (error) {
+        console.error(error);
+      }
     } else {
-      await addFavoriteMovie({
-        variables: {
-          id: movie.id,
-          title: movie.title,
-          release_date: movie.release_date,
-          poster_path: movie.poster_path,
-          media_type: movie.media_type,
-        },
-      });
-      setMovies(prevMovies => [...prevMovies, movie]);
+      // Add to favorites
+      try {
+        await addFavoriteMovie({
+          variables: {
+            id: movie.id,
+            title: movie.title,
+            release_date: movie.release_date,
+            poster_path: movie.poster_path,
+            media_type: movie.media_type,
+          },
+        });
+        setMovies(prevMovies => [...prevMovies, movie]);
+
+      } catch (error) {
+
+        console.error(error);
+      }
     }
   };
 

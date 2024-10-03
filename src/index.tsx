@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import App from './App';
 import './styles.css'; // Ensure your global styles are imported
+import { SnackbarProvider } from 'notistack';
 
 // Step 1: Create the Apollo Client
 const client = new ApolloClient({
@@ -16,7 +17,9 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
+      <SnackbarProvider maxSnack={3}>
       <App />
+      </SnackbarProvider>
     </ApolloProvider>
   </React.StrictMode>
 );

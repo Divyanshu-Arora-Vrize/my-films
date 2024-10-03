@@ -1,70 +1,79 @@
-import React, { useEffect, useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_WATCHLIST_MOVIES } from '../queries/moviesQueriesW';
-import MovieCard from './MovieCard';
-import Navbar from './Navbar';
-import SearchBar from './SearchBar';
-import Footer from './Footer';
+import React, { useState, useEffect } from 'react';
+import Navbar from '../Components/Navbar';
+import SearchBar from '../Components/SearchBar';
+import MovieGrid from '../Components/MovieGrid';
+import Footer from '../Components/Footer';
+import { fetchHomepageShows } from '../services/movieApi';
 import '../styles.css';
+import { Movie } from '../types'; 
 
-interface Movie {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
-  media_type: string;
-}
-
-interface WatchlistProps {
-  onWatchlistToggle: (movie: Movie) => void;
+interface HomePageProps {
   onFavoriteToggle: (movie: Movie) => void;
+  onWatchlistToggle: (movie: Movie) => void;
 }
 
-const Watchlist: React.FC<WatchlistProps> = ({ onWatchlistToggle, onFavoriteToggle }) => {
+const HomePage: React.FC<HomePageProps> = ({ onFavoriteToggle, onWatchlistToggle }) => {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [watchlist, setWatchlist] = useState<Movie[]>([]);
 
-  const { loading, error, data } = useQuery(GET_WATCHLIST_MOVIES);
+  // Utility function to load from localStorage
+  const loadFromLocalStorage = (key: string): Movie[] => {
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  };
 
+  // Utility function to save to localStorage
+  const saveToLocalStorage = (key: string, data: Movie[]) => {
+    localStorage.setItem(key, JSON.stringify(data));
+  };
+
+  // Fetch homepage shows when the component mounts
   useEffect(() => {
-    if (data && data.watchlist_movies) {
-      setMovies(data.watchlist_movies);
-    }
-  }, [data]);
+    const getMovies = async () => {
+      const fetchedMovies = await fetchHomepageShows();
+      setMovies(fetchedMovies);
+    };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error fetching watchlist: {error.message}</p>;
+    getMovies();
+  }, []);
+
+  // Load watchlist from localStorage on component mount
+  useEffect(() => {
+    const storedWatchlist = loadFromLocalStorage('watchlist');
+    setWatchlist(storedWatchlist);
+  }, []);
 
   return (
-    <div className="watchlist-page">
+    <div className="home-page">
       <Navbar />
       <div className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to My Watchlist</h1>
-          <p>All the movies and series you want to watch</p>
+          <h1>Welcome to My Films,</h1>
+          <p>Your favorite Movies & Series all in one place</p>
           <SearchBar setMovies={setMovies} />
         </div>
       </div>
 
-      <h2 className="section-title">My Watchlist</h2>
+      <h2 className="section-title">Movies</h2>
+      <MovieGrid
+        movies={movies}
+        onFavoriteToggle={onFavoriteToggle}
+        onWatchlistToggle={onWatchlistToggle}
+      />
 
-      <div className="movie-grid">
-        {movies.length > 0 ? (
-          movies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onWatchlistToggle={onWatchlistToggle}
-              onFavoriteToggle={onFavoriteToggle}
-            />
-          ))
-        ) : (
-          <p className="empty-message">No movies in your watchlist yet.</p>
-        )}
-      </div>
+      {watchlist.length > 0 && (
+        <>
+          <h2 className="section-title">Watchlist</h2>
+          <MovieGrid
+            movies={watchlist}
+            onFavoriteToggle={onFavoriteToggle}
+            onWatchlistToggle={onWatchlistToggle}
+          />
+        </>
+      )}
 
       <Footer />
     </div>
   );
 };
 
-export default Watchlist;
+export default HomePage;

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from '../src/pages/HomePage';
+// import HomePage from '../src/pages/HomePage';
 import FavoriteMovies from '../src/Components/FavoriteMovies';
 import Watchlist from '../src/Components/Watchlist';
 import { ApolloWrapper } from './apolloClient';
 import { Movie } from './types';
+import HomePageWrapper from './HomePageWrapper';
 
 const App: React.FC = () => {
   const [favoriteMovies, setFavoriteMovies] = useState<Movie[]>([]);
@@ -32,15 +33,9 @@ const App: React.FC = () => {
     <ApolloWrapper>
       <Router>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <HomePage
-                onFavoriteToggle={handleFavoriteToggle}
-                onWatchlistToggle={handleWatchlistToggle}
-              />
-            }
-          />
+        <Route path="/" element={<HomePageWrapper />} />
+
+
           <Route
             path="/favorites"
             element={
