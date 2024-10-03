@@ -1,79 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../Components/Navbar';
-import SearchBar from '../Components/SearchBar';
-import MovieGrid from '../Components/MovieGrid';
-import Footer from '../Components/Footer';
-import { fetchHomepageShows } from '../services/movieApi';
-import '../styles.css';
-import { Movie } from '../types'; 
+import React, { useEffect, useState, useRef } from 'react';
+import { useQuery } from '@apollo/client';
+import { GET_WATCHLIST_MOVIES } from '../queries/moviesQueries';
+import MovieCard from './MovieCard';
+import Navbar from './Navbar';
+import SearchBar from './SearchBar';
+import Footer from './Footer';
+import { Movie } from '../types'; // Ensure that the Movie type is correctly imported
 
-interface HomePageProps {
-  onFavoriteToggle: (movie: Movie) => void;
+interface WatchlistProps {
   onWatchlistToggle: (movie: Movie) => void;
+  onFavoriteToggle: (movie: Movie) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ onFavoriteToggle, onWatchlistToggle }) => {
+const Watchlist: React.FC<WatchlistProps> = ({ onWatchlistToggle, onFavoriteToggle }) => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [watchlist, setWatchlist] = useState<Movie[]>([]);
+  const movieGridRef = useRef<HTMLDivElement>(null);
 
-  // Utility function to load from localStorage
-  const loadFromLocalStorage = (key: string): Movie[] => {
-    return JSON.parse(localStorage.getItem(key) || '[]');
+  const { loading, error, data } = useQuery(GET_WATCHLIST_MOVIES);
+
+  useEffect(() => {
+    if (data && data.Watchlist) {
+      setMovies(data.Watchlist);
+    }
+  }, [data]);
+
+  // Function to scroll the movie grid
+  const scroll = (direction: 'left' | 'right') => {
+    if (movieGridRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      movieGridRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth',
+      });
+    }
   };
 
-  // Utility function to save to localStorage
-  const saveToLocalStorage = (key: string, data: Movie[]) => {
-    localStorage.setItem(key, JSON.stringify(data));
-  };
-
-  // Fetch homepage shows when the component mounts
-  useEffect(() => {
-    const getMovies = async () => {
-      const fetchedMovies = await fetchHomepageShows();
-      setMovies(fetchedMovies);
-    };
-
-    getMovies();
-  }, []);
-
-  // Load watchlist from localStorage on component mount
-  useEffect(() => {
-    const storedWatchlist = loadFromLocalStorage('watchlist');
-    setWatchlist(storedWatchlist);
-  }, []);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error fetching watchlist: {error.message}</p>;
 
   return (
-    <div className="home-page">
+    <div className="watchlist-page">
       <Navbar />
       <div className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to My Films,</h1>
-          <p>Your favorite Movies & Series all in one place</p>
+          <h1>Welcome to My Watchlist</h1>
+          <p>All the movies and series you want to watch</p>
           <SearchBar setMovies={setMovies} />
         </div>
       </div>
 
-      <h2 className="section-title">Movies</h2>
-      <MovieGrid
-        movies={movies}
-        onFavoriteToggle={onFavoriteToggle}
-        onWatchlistToggle={onWatchlistToggle}
-      />
+      <h2 className="section-title">My Watchlist</h2>
 
-      {watchlist.length > 0 && (
-        <>
-          <h2 className="section-title">Watchlist</h2>
-          <MovieGrid
-            movies={watchlist}
-            onFavoriteToggle={onFavoriteToggle}
-            onWatchlistToggle={onWatchlistToggle}
-          />
-        </>
-      )}
+      <div className="movie-grid-wrapper">
+        {/* Left arrow button */}
+        <button className="scroll-arrow left-arrow" onClick={() => scroll('left')}>
+          ←
+        </button>
+
+        <div className="movie-grid" ref={movieGridRef}>
+          {movies.length > 0 ? (
+            movies.map(movie => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onWatchlistToggle={() => onWatchlistToggle(movie)}
+                onFavoriteToggle={() => onFavoriteToggle(movie)}
+              />
+            ))
+          ) : (
+            <p className="empty-message">No movies in your watchlist yet.</p>
+          )}
+        </div>
+
+        {/* Right arrow button */}
+        <button className="scroll-arrow right-arrow" onClick={() => scroll('right')}>
+          →
+        </button>
+      </div>
 
       <Footer />
     </div>
   );
 };
 
-export default HomePage;
+export default Watchlist;

@@ -63,8 +63,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle, onWatchl
         }
       });
       onWatchlistToggle(movie);  // Trigger state update in parent component
+      enqueueSnackbar("Movie Added to WatchList",{variant:"success"})
     } catch (error) {
       console.error(error);
+      enqueueSnackbar("Faild to Add to Watchlist",{variant:"error"})
     }
     setMenuOpen(false);
   };

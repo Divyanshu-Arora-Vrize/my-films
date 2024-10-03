@@ -14,17 +14,6 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = ({ onFavoriteToggle, onWatchlistToggle }) => {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [watchlist, setWatchlist] = useState<Movie[]>([]);
-
-  // Utility function to load from localStorage
-  const loadFromLocalStorage = (key: string): Movie[] => {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  };
-
-  // Utility function to save to localStorage
-  const saveToLocalStorage = (key: string, data: Movie[]) => {
-    localStorage.setItem(key, JSON.stringify(data));
-  };
 
   // Fetch homepage shows when the component mounts
   useEffect(() => {
@@ -34,12 +23,6 @@ const HomePage: React.FC<HomePageProps> = ({ onFavoriteToggle, onWatchlistToggle
     };
 
     getMovies();
-  }, []);
-
-  // Load watchlist from localStorage on component mount
-  useEffect(() => {
-    const storedWatchlist = loadFromLocalStorage('watchlist');
-    setWatchlist(storedWatchlist);
   }, []);
 
   // Add a movie to favorites and display a toast notification
@@ -58,7 +41,7 @@ const HomePage: React.FC<HomePageProps> = ({ onFavoriteToggle, onWatchlistToggle
       <div className="hero-section">
         <div className="hero-content">
           <h1>Welcome to My Films,</h1>
-          <p>Your favorite Movies & Series all in one place</p>
+          <p>Your Movies & Series all in one place</p>
           <SearchBar setMovies={setMovies} />
         </div>
       </div>
@@ -69,17 +52,6 @@ const HomePage: React.FC<HomePageProps> = ({ onFavoriteToggle, onWatchlistToggle
         onFavoriteToggle={handleFavoriteToggle}
         onWatchlistToggle={handleWatchlistToggle}
       />
-
-      {watchlist.length > 0 && (
-        <>
-          <h2 className="section-title">Watchlist</h2>
-          <MovieGrid
-            movies={watchlist}
-            onFavoriteToggle={handleFavoriteToggle}
-            onWatchlistToggle={handleWatchlistToggle}
-          />
-        </>
-      )}
 
       <Footer />
 
