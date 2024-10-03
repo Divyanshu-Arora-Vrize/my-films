@@ -1,47 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useQuery } from '@apollo/client';
+import { GET_WATCHLIST_MOVIES } from '../queries/moviesQueries';
 import MovieCard from './MovieCard';
 import Navbar from './Navbar';
-import SearchBar from './SearchBar'; // Import SearchBar component
-import Footer from './Footer'; // Import Footer component
-import '../styles.css';
+import SearchBar from './SearchBar';
+import Footer from './Footer';
+import { Movie } from '../types'; // Ensure that the Movie type is correctly imported
 
-interface Movie {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
+interface WatchlistProps {
+  onWatchlistToggle: (movie: Movie) => void;
+  onFavoriteToggle: (movie: Movie) => void;
 }
 
-const Watchlist: React.FC = () => {
-  const [watchlistMovies, setWatchlistMovies] = useState<Movie[]>([]);
-  const [movies, setMovies] = useState<Movie[]>([]); // To handle search results
+const Watchlist: React.FC<WatchlistProps> = ({ onWatchlistToggle, onFavoriteToggle }) => {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const movieGridRef = useRef<HTMLDivElement>(null);
+
+  const { loading, error, data } = useQuery(GET_WATCHLIST_MOVIES);
 
   useEffect(() => {
-    // Retrieve the watchlist from localStorage
-    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setWatchlistMovies(savedWatchlist);
-  }, []);
+    if (data && data.Watchlist) {
+      setMovies(data.Watchlist);
+    }
+  }, [data]);
 
-  const handleWatchlistToggle = (movie: Movie) => {
-    // Remove the movie from the watchlist
-    const updatedWatchlist = watchlistMovies.filter(watchMovie => watchMovie.id !== movie.id);
-    setWatchlistMovies(updatedWatchlist);
-    localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
-  };
-
-  const handleFavoriteToggle = (movie: Movie) => {
-    // If you need to implement the favorite toggle, do so here.
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const isFavorite = favorites.some((favMovie: Movie) => favMovie.id === movie.id);
-
-    if (isFavorite) {
-      const updatedFavorites = favorites.filter((favMovie: Movie) => favMovie.id !== movie.id);
-      localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    } else {
-      favorites.push(movie);
-      localStorage.setItem('favorites', JSON.stringify(favorites));
+  // Function to scroll the movie grid
+  const scroll = (direction: 'left' | 'right') => {
+    if (movieGridRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      movieGridRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth',
+      });
     }
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error fetching watchlist: {error.message}</p>;
 
   return (
     <div className="watchlist-page">
@@ -50,37 +45,40 @@ const Watchlist: React.FC = () => {
         <div className="hero-content">
           <h1>Welcome to My Watchlist</h1>
           <p>All the movies and series you want to watch</p>
-          <SearchBar setMovies={setMovies} /> {/* Search functionality */}
+          <SearchBar setMovies={setMovies} />
         </div>
       </div>
 
       <h2 className="section-title">My Watchlist</h2>
 
-      <div className="movie-grid">
-        {movies.length > 0 ? (
-          movies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onWatchlistToggle={handleWatchlistToggle}
-              onFavoriteToggle={handleFavoriteToggle}
-            />
-          ))
-        ) : watchlistMovies.length > 0 ? (
-          watchlistMovies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onWatchlistToggle={handleWatchlistToggle}
-              onFavoriteToggle={handleFavoriteToggle}
-            />
-          ))
-        ) : (
-          <p className="empty-message">No movies in your watchlist yet.</p>
-        )}
+      <div className="movie-grid-wrapper">
+        {/* Left arrow button */}
+        <button className="scroll-arrow left-arrow" onClick={() => scroll('left')}>
+          ←
+        </button>
+
+        <div className="movie-grid" ref={movieGridRef}>
+          {movies.length > 0 ? (
+            movies.map(movie => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onWatchlistToggle={() => onWatchlistToggle(movie)}
+                onFavoriteToggle={() => onFavoriteToggle(movie)}
+              />
+            ))
+          ) : (
+            <p className="empty-message">No movies in your watchlist yet.</p>
+          )}
+        </div>
+
+        {/* Right arrow button */}
+        <button className="scroll-arrow right-arrow" onClick={() => scroll('right')}>
+          →
+        </button>
       </div>
 
-      <Footer /> {/* Add the Footer */}
+      <Footer />
     </div>
   );
 };

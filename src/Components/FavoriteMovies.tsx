@@ -1,50 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
+import { GET_FAVORITE_MOVIES, ADD_FAVORITE_MOVIE, REMOVE_FAVORITE_MOVIE } from '../queries/moviesQueries';
 import MovieCard from './MovieCard';
 import Navbar from './Navbar';
 import SearchBar from './SearchBar';
 import Footer from './Footer';
-import '../styles.css'; // Importing global styles
-import { toast } from 'react-toastify'; // Importing toast for notifications
-import 'react-toastify/dist/ReactToastify.css'; // Importing toast styles
+import { Movie } from '../types';
+import '../styles.css';
 
-interface Movie {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
+interface FavoriteMoviesProps {
+  onFavoriteToggle: (movie: Movie) => void;
+  onWatchlistToggle: (movie: Movie) => void;
 }
 
-const FavoriteMovies: React.FC = () => {
-  const [favoriteMovies, setFavoriteMovies] = useState<Movie[]>([]);
-  const [movies, setMovies] = useState<Movie[]>([]); // To handle search results
-  const [watchlist, setWatchlist] = useState<Movie[]>([]); // State for watchlist
+const FavoriteMovies: React.FC<FavoriteMoviesProps> = ({ onFavoriteToggle, onWatchlistToggle }) => {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const movieGridRef = useRef<HTMLDivElement>(null);
+
+  // Apollo useQuery hook to fetch data from Hasura
+  const { loading, error, data } = useQuery(GET_FAVORITE_MOVIES);
+
+  // Apollo useMutation hooks for adding/removing favorite movies
+  const [addFavoriteMovie] = useMutation(ADD_FAVORITE_MOVIE);
+  const [removeFavoriteMovie] = useMutation(REMOVE_FAVORITE_MOVIE);
 
   useEffect(() => {
-    const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const savedWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
-    setFavoriteMovies(savedFavorites);
-    setWatchlist(savedWatchlist);
-  }, []);
+    if (data && data.FavoriteMovies) {
+      setMovies(data.FavoriteMovies);
+    }
+  }, [data]);
 
-  const handleFavoriteToggle = (movie: Movie) => {
-    const updatedFavorites = favoriteMovies.some(favMovie => favMovie.id === movie.id)
-      ? favoriteMovies.filter(favMovie => favMovie.id !== movie.id)
-      : [...favoriteMovies, movie];
+  const handleFavoriteToggle = async (movie: Movie) => {
+    const isFavorite = movies.some(favMovie => favMovie.id === movie.id);
 
-    setFavoriteMovies(updatedFavorites);
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-    toast(updatedFavorites.some(favMovie => favMovie.id === movie.id) ? 'Added to favorites' : 'Removed from favorites');
+    if (isFavorite) {
+      // Remove from favorites
+      try {
+        await removeFavoriteMovie({ variables: { id: movie.id } });
+        setMovies(prevMovies => prevMovies.filter(m => m.id !== movie.id));
+      } catch (error) {
+        console.error('Error removing movie from favorites:', error);
+      }
+    } else {
+      // Add to favorites
+      try {
+        await addFavoriteMovie({
+          variables: {
+            id: movie.id,
+            title: movie.title,
+            release_date: movie.release_date,
+            poster_path: movie.poster_path,
+            media_type: movie.media_type,
+          },
+        });
+        setMovies(prevMovies => [...prevMovies, movie]);
+      } catch (error) {
+        console.error('Error adding movie to favorites:', error);
+      }
+    }
   };
 
-  const handleWatchlistToggle = (movie: Movie) => {
-    const updatedWatchlist = watchlist.some(watchlistMovie => watchlistMovie.id === movie.id)
-      ? watchlist.filter(watchlistMovie => watchlistMovie.id !== movie.id)
-      : [...watchlist, movie];
-
-    setWatchlist(updatedWatchlist);
-    localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
-    toast(updatedWatchlist.some(watchlistMovie => watchlistMovie.id === movie.id) ? 'Added to watchlist' : 'Removed from watchlist');
+  // Function to scroll the movie grid
+  const scroll = (direction: 'left' | 'right') => {
+    if (movieGridRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      movieGridRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth',
+      });
+    }
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error fetching data: {error.message}</p>;
 
   return (
     <div className="favorite-movies-page">
@@ -53,34 +81,37 @@ const FavoriteMovies: React.FC = () => {
         <div className="hero-content">
           <h1>Welcome to My Favorite Movies</h1>
           <p>Your favorite Movies & Series all in one place</p>
-          <SearchBar setMovies={setMovies} /> {/* Search functionality */}
+          <SearchBar setMovies={setMovies} />
         </div>
       </div>
 
       <h2 className="section-title">Favorite Movies</h2>
 
-      <div className="movie-grid">
-        {movies.length > 0 ? (
-          movies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onFavoriteToggle={handleFavoriteToggle}
-              onWatchlistToggle={handleWatchlistToggle}
-            />
-          ))
-        ) : favoriteMovies.length > 0 ? (
-          favoriteMovies.map(movie => (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-              onFavoriteToggle={handleFavoriteToggle}
-              onWatchlistToggle={handleWatchlistToggle}
-            />
-          ))
-        ) : (
-          <p>No favorite movies yet.</p>
-        )}
+      <div className="movie-grid-wrapper">
+        {/* Left arrow button */}
+        <button className="scroll-arrow left-arrow" onClick={() => scroll('left')}>
+          ←
+        </button>
+
+        <div className="movie-grid" ref={movieGridRef}>
+          {movies.length > 0 ? (
+            movies.map(movie => (
+              <MovieCard
+                key={movie.id}
+                movie={movie}
+                onFavoriteToggle={() => handleFavoriteToggle(movie)}
+                onWatchlistToggle={onWatchlistToggle}
+              />
+            ))
+          ) : (
+            <p>No favorite movies yet.</p>
+          )}
+        </div>
+
+        {/* Right arrow button */}
+        <button className="scroll-arrow right-arrow" onClick={() => scroll('right')}>
+          →
+        </button>
       </div>
 
       <Footer />

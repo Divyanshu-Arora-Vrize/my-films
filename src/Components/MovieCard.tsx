@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { toast } from 'react-toastify';
+import { useMutation } from '@apollo/client';
+import { ADD_FAVORITE_MOVIE, REMOVE_FAVORITE_MOVIE, ADD_TO_WATCHLIST, REMOVE_FROM_WATCHLIST } from '../queries/moviesQueries';
+import { Movie } from '../types';
+import { enqueueSnackbar } from 'notistack';
 
-interface Movie {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
-}
+// interface Movie {
+//   id: number;
+//   title: string;
+//   release_date: string;
+//   poster_path: string;
+// }
 
 interface MovieCardProps {
   movie: Movie;
@@ -17,23 +20,54 @@ interface MovieCardProps {
 const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteToggle, onWatchlistToggle }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Define mutations for adding/removing from favorites and watchlist
+  const [addFavoriteMovie] = useMutation(ADD_FAVORITE_MOVIE);
+  const [removeFavoriteMovie] = useMutation(REMOVE_FAVORITE_MOVIE);
+  const [addToWatchlist] = useMutation(ADD_TO_WATCHLIST);
+  const [removeFromWatchlist] = useMutation(REMOVE_FROM_WATCHLIST);
+
   const posterUrl = movie.poster_path
     ? movie.poster_path
     : 'https://via.placeholder.com/200x300?text=No+Image+Available';
 
   const movieTitle = movie.title || 'No Title Available';
-
   const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'No Release Date Available';
 
-  const handleFavoriteClick = () => {
-    onFavoriteToggle(movie);
-    toast.success(`${movieTitle} added to favorites!`);
+  const handleFavoriteClick = async () => {
+    try {
+      await addFavoriteMovie({
+        variables: {
+          id: movie.id,
+          title: movie.title,
+          release_date: movie.release_date,
+          poster_path: movie.poster_path,
+        }
+      });
+      onFavoriteToggle(movie);
+      enqueueSnackbar("Movie Added to Favorite",{variant:"success"})
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar("Failed to add movie ",{variant:"error"})
+    }
     setMenuOpen(false);
   };
 
-  const handleWatchlistClick = () => {
-    onWatchlistToggle(movie);
-    toast.success(`${movieTitle} added to watchlist!`);
+  const handleWatchlistClick = async () => {
+    try {
+      await addToWatchlist({
+        variables: {
+          id: movie.id,
+          title: movie.title,
+          release_date: movie.release_date,
+          poster_path: movie.poster_path,
+        }
+      });
+      onWatchlistToggle(movie);  // Trigger state update in parent component
+      enqueueSnackbar("Movie Added to WatchList",{variant:"success"})
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar("Faild to Add to Watchlist",{variant:"error"})
+    }
     setMenuOpen(false);
   };
 

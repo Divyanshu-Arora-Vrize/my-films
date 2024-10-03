@@ -7,6 +7,7 @@ interface Movie {
   title: string;
   release_date: string;
   poster_path: string;
+  media_type: string;
 }
 
 interface SearchBarProps {
@@ -18,11 +19,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ setMovies }) => {
 
   const handleSearch = async () => {
     if (query.trim() === '') {
-      // Fetch homepage shows if search query is empty
-      const homepageShows = await fetchHomepageShows();
+      const homepageShows: Movie[] = await fetchHomepageShows(); // Ensure this returns movies with 'media_type'
       setMovies(homepageShows);
     } else {
-      const results = await fetchMovies(query);
+      const results: Movie[] = await fetchMovies(query); // Ensure this returns movies with 'media_type'
       setMovies(results);
     }
   };

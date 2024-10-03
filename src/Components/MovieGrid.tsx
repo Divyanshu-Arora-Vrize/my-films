@@ -1,12 +1,6 @@
 import React, { useRef } from 'react';
 import MovieCard from './MovieCard';
-
-interface Movie {
-  id: number;
-  title: string;
-  release_date: string;
-  poster_path: string;
-}
+import { Movie } from '../types'; // Adjust the path if necessary
 
 interface MovieGridProps {
   movies: Movie[];
@@ -19,13 +13,13 @@ const MovieGrid: React.FC<MovieGridProps> = ({ movies, onFavoriteToggle, onWatch
 
   const handleScrollLeft = () => {
     if (movieGridRef.current) {
-      movieGridRef.current.scrollBy({ left: -301, behavior: 'smooth' });
+      movieGridRef.current.scrollBy({ left: -300, behavior: 'smooth' });
     }
   };
 
   const handleScrollRight = () => {
     if (movieGridRef.current) {
-      movieGridRef.current.scrollBy({ left: 301, behavior: 'smooth' });
+      movieGridRef.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
   };
 
